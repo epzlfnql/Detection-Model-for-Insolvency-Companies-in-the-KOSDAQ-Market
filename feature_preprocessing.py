@@ -10,6 +10,9 @@ from catboost import CatBoostClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, f1_score
 
+import eli5
+from eli5.sklearn import PermutationImportance
+
 import numpy as np
 from sklearn.feature_selection import RFE, RFECV
 from catboost import CatBoostClassifier
@@ -57,4 +60,4 @@ def rfecv(model, x_data, y_data):
 
 
 def eli5(model, x_data, y_data, i):
-    
+
