@@ -5,7 +5,13 @@
 '''
 import pandas as pd
 import numpy as np
-from sklearn.feature_selection import RFE, FRECV
+from sklearn.feature_selection import RFE, RFECV
+from catboost import CatBoostClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score, f1_score
+
+import numpy as np
+from sklearn.feature_selection import RFE, RFECV
 from catboost import CatBoostClassifier
 #from
 
@@ -25,7 +31,7 @@ def rfe(model, x_data, y_data, ratio=0.9, min_feats=10):  # 어떤 모델을 넣
         # score = roc_auc_score(y_val, val_pred)
         score = f1_score(y_val, val_pred)  # f1 score를 기준으로
         n_feats = len(feats)
-        print(n_feats, score)
+        # print(n_feats, score)
         archive = archive.append({'model': model, 'n_feats': n_feats, 'feats': feats, 'score': score},
                                  ignore_index=True)
         feat_imp = pd.Series(model.feature_importances_, index=feats).sort_values(ascending=False)
@@ -34,4 +40,21 @@ def rfe(model, x_data, y_data, ratio=0.9, min_feats=10):  # 어떤 모델을 넣
             break
         else:
             feats = feat_imp.iloc[:next_n_feats].index.tolist()
-    return archive
+
+        archive = archive.sort_values(by=archive.columns[3], ascending=False)
+        archive = archive.reset_index(drop=True)
+    return archive['feats'][0]  # 스코어 가장 높을때 feature 리스트 반환
+
+
+def rfecv(model, x_data, y_data):
+    min_features_to_select = 10  # 최소한으로 선택할 변수 개수
+    step = 1  # 매 단계마다 제거할 변수 개수
+    selector = RFECV(clf, step=step, cv=10, scoring='f1_micro', min_features_to_select=min_features_to_select,
+                     verbose=0)
+    selector = selector.fit(x_data, y_data)
+
+    return list(x_data.columns[selector.support_])
+
+
+def eli5(model, x_data, y_data, i):
+    
