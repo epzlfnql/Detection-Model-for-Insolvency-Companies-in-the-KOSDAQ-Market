@@ -19,6 +19,10 @@ from catboost import CatBoostClassifier
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier,RandomForestRegressor
 from lightgbm import LGBMClassifier
 from tqdm import tqdm
+import time
+
+
+start_time = time.time()
 
 # 데이터 불러오기
 df = pd.read_csv('./data/real_final_data_for_modeling.csv')
@@ -223,3 +227,10 @@ def make_feature_selection_df(rfe_features_list, rfecv_features_list,perm_featur
 
 feature_selection_df = make_feature_selection_df(rfe_features_list, rfecv_features_list, perm_features_list, stepwise_feature_list, select_k_feature_list)
 feature_selection_df.to_csv('./data/feature_selection_df.csv', index=False)
+
+
+
+# feature selection 경과시간 확인
+elapsed_time = time.time() - start_time
+print(elapsed_time)
+print(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
