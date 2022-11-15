@@ -61,6 +61,21 @@ def rfe(model, x_data, y_data, select_feat_num=21):
     return list(x_data.columns[selected_features])
 
 # rfe_features_list
+cat_clf = CatBoostClassifier(random_state = 1123)
+lda_clf = LDA(n_components=1)
+RF_clf = RandomForestClassifier(random_state=1123)
+EX_clf = ExtraTreesClassifier(random_state=1123)
+LGB_clf = LGBMClassifier(random_state=1123)
+GB_clf = GradientBoostingClassifier(random_state=1123)
+
+
+models = [ ("CF", cat_clf),
+          ("LDA", lda_clf),
+          ("RF", RF_clf),
+          ("EX", EX_clf),
+          ("LGB", LGB_clf),
+          ('GB', GB_clf)
+         ]
 rfe_features_list = []
 for name, model in tqdm(models):
   y_data = df['관리종목여부'].values
@@ -81,6 +96,23 @@ def rfecv(model, x_data, y_data):
     return list(x_data.columns[selector.support_])
 
 # rfecv_feature
+cat_clf = CatBoostClassifier(random_state = 1123)
+lda_clf = LDA(n_components=1)
+RF_clf = RandomForestClassifier(random_state=1123)
+EX_clf = ExtraTreesClassifier(random_state=1123)
+LGB_clf = LGBMClassifier(random_state=1123)
+GB_clf = GradientBoostingClassifier(random_state=1123)
+
+
+models = [ ("CF", cat_clf),
+          ("LDA", lda_clf),
+          ("RF", RF_clf),
+          ("EX", EX_clf),
+          ("LGB", LGB_clf),
+          ('GB', GB_clf)
+         ]
+
+
 rfecv_features_list = []
 for name, model in tqdm(models):
   y_data = df['관리종목여부'].values
@@ -93,8 +125,14 @@ for name, model in tqdm(models):
 
 
 # 3. PermutationImportance
-def permutation_selection(model, x_data, y_data):
-  perm = PermutationImportance(cat_clf, scoring='f1', random_state=1123).fit(x_data, y_data)
+import eli5
+from eli5.sklearn import PermutationImportance
+
+
+def permutation_selection(model_name, x_data, y_data):
+  x_train, x_val, y_train, y_val = train_test_split(x_data, y_data, random_state=1123)
+  model_name.fit(x_train, y_train)
+  perm = PermutationImportance(model_name, scoring='f1', random_state=1123).fit(x_val, y_val)
   # eli5.show_weights(perm, top=30, feature_names = x_data.columns.tolist())
   df_fi = pd.DataFrame(dict(feature_names=x_data.columns.tolist(),
                             feat_imp=perm.feature_importances_,
@@ -105,14 +143,33 @@ def permutation_selection(model, x_data, y_data):
   return selected_feature
 
 
-# perm_features_list
+# perm_feature
+cat_clf = CatBoostClassifier(random_state = 1123)
+lda_clf = LDA(n_components=1)
+RF_clf = RandomForestClassifier(random_state=1123)
+EX_clf = ExtraTreesClassifier(random_state=1123)
+LGB_clf = LGBMClassifier(random_state=1123)
+GB_clf = GradientBoostingClassifier(random_state=1123)
+
+models = [ ("CF", cat_clf),
+          ("LDA", lda_clf),
+          ("RF", RF_clf),
+          ("EX", EX_clf),
+          ("LGB", LGB_clf),
+          ('GB', GB_clf)
+         ]
+
+# perm_feature
 perm_features_list = []
 for name, model in tqdm(models):
   y_data = df['관리종목여부'].values
   x_data = df.drop(['Stock', '관리종목여부'], axis=1)
   clf = model
-  perm_feature = permutation_selection(model, x_data, y_data)
+  perm_feature = permutation_selection(clf, x_data, y_data)
   perm_features_list.append(perm_feature)
+
+
+
 
 
 
